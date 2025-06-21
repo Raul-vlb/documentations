@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Documentação</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        nav {
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 1rem;
+        }
+
+        nav h2 {
+            margin-top: 1.5rem;
+            font-size: 1.25rem;
+            color: #333;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.25rem;
+        }
+
+        nav a {
+            display: block;
+            margin: 0.25rem 0;
+            color: #007acc;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+        #content {
+            line-height: 1.6;
+        }
+
+        pre,
+        code {
+            background: #f4f4f4;
+            padding: 0.3em 0.5em;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+
+        pre {
+            padding: 1em;
+            overflow-x: auto;
+        }
+
+        a#back {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: #666;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        a#back:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>📚 Documentação</h1>
+    <nav id="file-list">
+        <!-- Navegação será inserida aqui -->
+    </nav>
+
+    <div id="content">
+        <em>Selecione um arquivo para visualizar.</em>
+    </div>
+
+    <script>
+        // Estrutura de arquivos agrupados por pasta ("" significa raiz)
+        const filesByFolder = {
+            '': [''],
+            'wordpress': ['intro.md'],
+            'react': ['']
+        };
+
+        const fileList = document.getElementById("file-list");
+        const content = document.getElementById("content");
+
+        // Função para carregar e renderizar Markdown
+        async function loadMarkdown(file) {
+            content.innerHTML = "<em>Carregando...</em>";
+            try {
+                const response = await fetch("docs/" + file);
+                if (!response.ok) {
+                    content.innerHTML = "<strong>Erro: Arquivo não encontrado.</strong>";
+                    return;
+                }
+                const markdown = await response.text();
+                content.innerHTML =
+                    `<a href="#" id="back" onclick="showNav(); return false;">← Voltar à lista</a>` +
+                    marked.parse(markdown);
+                hideNav();
+                // Ajusta âncora para remover hash (opcional)
+                history.pushState(null, "", location.pathname);
+            } catch (err) {
+                content.innerHTML = `<strong>Erro ao carregar o arquivo.</strong><br>${err}`;
+            }
+        }
+
+        // Exibe a navegação, oculta o conteúdo
+        function showNav() {
+            fileList.style.display = "block";
+            content.innerHTML = "<em>Selecione um arquivo para visualizar.</em>";
+        }
+
+        // Oculta a navegação (quando o arquivo está aberto)
+        function hideNav() {
+            fileList.style.display = "none";
+        }
+
+        // Monta a lista navegável agrupada por pastas
+        function buildNav() {
+            for (const folder in filesByFolder) {
+                if (folder !== "") {
+                    const h2 = document.createElement("h2");
+                    h2.textContent = folder;
+                    fileList.appendChild(h2);
+                }
+                filesByFolder[folder].forEach((file) => {
+                    const fullPath = folder ? folder + "/" + file : file;
+                    const link = document.createElement("a");
+                    link.href = "#" + fullPath;
+                    link.textContent = file;
+                    link.onclick = (e) => {
+                        e.preventDefault();
+                        loadMarkdown(fullPath);
+                    };
+                    fileList.appendChild(link);
+                });
+            }
+        }
+
+        // Inicializa a navegação
+        buildNav();
+
+        // Se tiver hash na URL, carrega o arquivo correspondente
+        window.addEventListener("load", () => {
+            if (location.hash) {
+                const file = decodeURIComponent(location.hash.substring(1));
+                // Verifica se o arquivo está na estrutura (básico)
+                let found = false;
+                outer: for (const folder in filesByFolder) {
+                    for (const f of filesByFolder[folder]) {
+                        const fullPath = folder ? folder + "/" + f : f;
+                        if (fullPath === file) {
+                            found = true;
+                            break outer;
+                        }
+                    }
+                }
+                if (found) {
+                    loadMarkdown(file);
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
