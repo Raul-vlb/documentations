@@ -244,5 +244,3 @@ Ao seguir estas boas práticas:
 * Seus projetos se beneficiarão de uma base sólida e confiável.
 
 ---
-
-Se quiser, posso montar a estrutura inicial do tema com todos esses arquivos e códigos já organizados. Deseja isso?
