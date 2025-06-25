@@ -3,75 +3,155 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>Documentação</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Documentações</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
+        :root {
+            --font-body: 'Segoe UI', sans-serif;
+            --color-primary: #007acc;
+            --color-text: #222;
+            --color-muted: #666;
+            --color-border: #e0e0e0;
+            --color-background: #fafafa;
+            --color-code-bg: #f4f4f4;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --color-text: #ddd;
+                --color-muted: #aaa;
+                --color-background: #121212;
+                --color-border: #2a2a2a;
+                --color-code-bg: #1e1e1e;
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: sans-serif;
-            max-width: 900px;
-            margin: 2rem auto;
-            padding: 0 1rem;
+            font-family: var(--font-body);
+            background-color: var(--color-background);
+            color: var(--color-text);
+            max-width: 960px;
+            margin: 3rem auto;
+            padding: 0 1.5rem;
+            line-height: 1.75;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            margin-bottom: 2rem;
+            color: var(--color-muted);
+        }
+
+        input[type="search"] {
+            width: 100%;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            background: var(--color-background);
+            color: var(--color-text);
         }
 
         nav {
-            margin-bottom: 2rem;
-            border-bottom: 1px solid #ccc;
-            padding-bottom: 1rem;
+            margin-bottom: 3rem;
+            border-bottom: 1px solid var(--color-border);
+            padding-bottom: 1.5rem;
         }
 
         nav h2 {
-            margin-top: 1.5rem;
-            font-size: 1.25rem;
-            color: #333;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 0.25rem;
+            margin-top: 2rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--color-text);
+            border-left: 4px solid var(--color-primary);
+            padding-left: 0.5rem;
+            text-transform: capitalize;
         }
 
         nav a {
             display: block;
-            margin: 0.25rem 0;
-            color: #007acc;
+            margin: 0.3rem 0;
+            padding: 0.3rem 0.5rem;
+            color: var(--color-primary);
             text-decoration: none;
-            cursor: pointer;
+            border-radius: 4px;
+            transition: background 0.2s;
         }
 
         nav a:hover {
-            text-decoration: underline;
+            background: rgba(0, 122, 204, 0.1);
         }
 
-        #content {
-            line-height: 1.6;
+        #content em {
+            color: var(--color-muted);
         }
 
-        pre,
-        code {
-            background: #f4f4f4;
-            padding: 0.3em 0.5em;
-            border-radius: 4px;
+        #content h1,
+        #content h2,
+        #content h3 {
+            margin-top: 2rem;
+            color: var(--color-text);
+        }
+
+        #content pre,
+        #content code {
+            background: var(--color-code-bg);
             font-family: monospace;
+            font-size: 0.95rem;
+            border-radius: 6px;
         }
 
-        pre {
+        #content pre {
             padding: 1em;
             overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+
+        #content code {
+            padding: 0.2em 0.4em;
         }
 
         a#back {
             display: inline-block;
-            margin-bottom: 1rem;
-            color: #666;
+            margin-bottom: 1.5rem;
+            color: var(--color-muted);
             text-decoration: none;
             font-size: 0.9rem;
+            transition: color 0.2s;
         }
 
         a#back:hover {
             text-decoration: underline;
+            color: var(--color-text);
+        }
+
+        .hidden {
+            display: none !important;
         }
     </style>
 </head>
 
 <body>
-    <h1>📚 Documentação</h1>
+    <h1>📚 Documentações</h1>
+
+    <p>
+        Página dedicada à organização de documentações relacionadas a processos, práticas e padrões utilizados em
+        diferentes projetos de desenvolvimento. O conteúdo pode abranger desde orientações específicas até anotações
+        gerais.
+    </p>
+
+    <input type="search" id="search" placeholder="🔍 Buscar documentação...">
+
     <nav id="file-list">
         <!-- Navegação será inserida aqui -->
     </nav>
@@ -81,17 +161,21 @@
     </div>
 
     <script>
-        // Estrutura de arquivos agrupados por pasta ("" significa raiz)
         const filesByFolder = {
-            '': [''],
-            'wordpress': ['intro.md'],
-            'react': ['']
+            'wordpress': [
+                { file: 'themes.md', title: 'Desenvolvimento de Temas' },
+                { file: 'Taxonomies.md', title: 'Uso de Taxonomias' },
+                { file: 'WP_Query.md', title: 'WP_Query' },
+            ],
+        //     'react': [
+        //         { file: 'Introducao.md', title: 'Introdução ao Projeto React' }
+        //     ]
         };
 
         const fileList = document.getElementById("file-list");
         const content = document.getElementById("content");
+        const searchInput = document.getElementById("search");
 
-        // Função para carregar e renderizar Markdown
         async function loadMarkdown(file) {
             content.innerHTML = "<em>Carregando...</em>";
             try {
@@ -105,37 +189,35 @@
                     `<a href="#" id="back" onclick="showNav(); return false;">← Voltar à lista</a>` +
                     marked.parse(markdown);
                 hideNav();
-                // Ajusta âncora para remover hash (opcional)
                 history.pushState(null, "", location.pathname);
             } catch (err) {
                 content.innerHTML = `<strong>Erro ao carregar o arquivo.</strong><br>${err}`;
             }
         }
 
-        // Exibe a navegação, oculta o conteúdo
         function showNav() {
             fileList.style.display = "block";
             content.innerHTML = "<em>Selecione um arquivo para visualizar.</em>";
         }
 
-        // Oculta a navegação (quando o arquivo está aberto)
         function hideNav() {
             fileList.style.display = "none";
         }
 
-        // Monta a lista navegável agrupada por pastas
         function buildNav() {
+            fileList.innerHTML = "";
             for (const folder in filesByFolder) {
                 if (folder !== "") {
                     const h2 = document.createElement("h2");
                     h2.textContent = folder;
                     fileList.appendChild(h2);
                 }
-                filesByFolder[folder].forEach((file) => {
+                filesByFolder[folder].forEach(({ file, title }) => {
                     const fullPath = folder ? folder + "/" + file : file;
                     const link = document.createElement("a");
                     link.href = "#" + fullPath;
-                    link.textContent = file;
+                    link.dataset.search = title.toLowerCase();
+                    link.textContent = `📄 ${title}`;
                     link.onclick = (e) => {
                         e.preventDefault();
                         loadMarkdown(fullPath);
@@ -145,17 +227,51 @@
             }
         }
 
-        // Inicializa a navegação
+        // Busca dinâmica
+        searchInput.addEventListener("input", () => {
+            const query = searchInput.value.toLowerCase().trim();
+            const sections = fileList.querySelectorAll("h2");
+
+            sections.forEach(h2 => {
+                const nextLinks = [];
+                let el = h2.nextElementSibling;
+
+                // Agrupa os links que pertencem a esse título
+                while (el && el.tagName.toLowerCase() === 'a') {
+                    nextLinks.push(el);
+                    el = el.nextElementSibling;
+                }
+
+                let anyVisible = false;
+
+                nextLinks.forEach(link => {
+                    const text = link.dataset.search;
+                    if (!text.includes(query)) {
+                        link.classList.add("hidden");
+                    } else {
+                        link.classList.remove("hidden");
+                        anyVisible = true;
+                    }
+                });
+
+                // Mostra ou oculta o título com base nos resultados
+                if (anyVisible) {
+                    h2.classList.remove("hidden");
+                } else {
+                    h2.classList.add("hidden");
+                }
+            });
+        });
+
+
         buildNav();
 
-        // Se tiver hash na URL, carrega o arquivo correspondente
         window.addEventListener("load", () => {
             if (location.hash) {
                 const file = decodeURIComponent(location.hash.substring(1));
-                // Verifica se o arquivo está na estrutura (básico)
                 let found = false;
                 outer: for (const folder in filesByFolder) {
-                    for (const f of filesByFolder[folder]) {
+                    for (const { file: f } of filesByFolder[folder]) {
                         const fullPath = folder ? folder + "/" + f : f;
                         if (fullPath === file) {
                             found = true;
